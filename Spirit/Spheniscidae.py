@@ -1,9 +1,11 @@
 import logging
+from time import time
 import xml.etree.ElementTree as ET
 
 from twisted.protocols.basic import LineReceiver
 
 from Crypto import Crypto
+from Data.User import User
 
 class Spheniscidae(LineReceiver):
 
@@ -24,6 +26,38 @@ class Spheniscidae(LineReceiver):
 		password = data[0][1].text
 
 		self.logger.info("{0} is attempting to login".format(username))
+
+		user = self.session.query(User).filter_by(Username=username).first()
+
+		if user is None:
+			self.sendLine("%xt%e%-1%101%")
+			return self.transport.loseConnection()
+
+		databasePassword = user.Password
+
+		loginHash = Crypto.getLoginHash(databasePassword, self.randomKey)
+
+		if password == loginHash:
+			confirmationHash = Crypto.hash(self.randomKey)
+			friendsKey = Crypto.hash(user.Id)
+
+			user.ConfirmationHash = confirmationHash
+			user.LoginKey = self.randomKey
+
+			self.session.add(user)
+
+			loginTime = time()
+
+			# TODO: Take another look at the login packet CP sends
+
+			loginPacket = "%xt%l%-1%{0}|{1}|{2}|{3}|1|45|2|false|true|{4}%{5}%{6}%101,1%spirit@solero.me%" \
+				.format(user.Id, user.Swid, user.Username, user.LoginKey, loginTime, confirmationHash, friendsKey)
+
+			self.sendLine(loginPacket)
+
+		else:
+			self.sendLine("%xt%e%-1%101%")
+			return self.transport.loseConnection()
 
 	def handleRandomKey(self, data):
 		self.logger.debug("Received random key request")
@@ -90,3 +124,7 @@ class Spheniscidae(LineReceiver):
 
 	def handleWorldData(self, data):
 		self.logger.debug("Received XT data: {0}".format(data))
+
+	def connectionLost(self, reason):
+		self.logger.info("Client disconnected")
+		self.session.close()
