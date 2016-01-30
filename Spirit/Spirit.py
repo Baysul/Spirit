@@ -33,7 +33,7 @@ class Spirit(Factory, object):
 	def buildProtocol(self, addr):
 		session = self.createSession()
 
-		player = Spheniscidae(session)
+		player = self.protocol(session)
 
 		return player
 
