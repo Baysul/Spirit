@@ -12,7 +12,7 @@ class User(Base):
     Username = Column(String(12, u'utf8mb4_unicode_ci'), nullable=False, unique=True)
     Password = Column(String(128, u'utf8mb4_unicode_ci'), nullable=False)
     Swid = Column(String(39, u'utf8mb4_unicode_ci'), nullable=False)
-    LoginKey = Column(String(16, u'utf8mb4_unicode_ci'))
+    LoginKey = Column(String(32, u'utf8mb4_unicode_ci'))
     ConfirmationHash = Column(String(128, u'utf8mb4_unicode_ci'))
     Color = Column(Integer, nullable=False, server_default=text("'1'"))
     Head = Column(Integer, nullable=False, server_default=text("'0'"))
