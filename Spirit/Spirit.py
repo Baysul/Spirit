@@ -25,7 +25,7 @@ class Spirit(Factory, object):
 		self.protocol = Penguin if self.server["World"] else Spheniscidae
 
 		# TODO - make the engine string retrieve the values from the configuration attribute
-		self.databaseEngine = create_engine('mysql://root@localhost/spirit')
+		self.databaseEngine = create_engine('mysql://root@localhost/spirit', pool_recycle=3600)
 		self.createSession = sessionmaker(bind=self.databaseEngine)
 
 		self.logger.info("Spirit module initialized")
