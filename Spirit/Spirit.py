@@ -1,8 +1,10 @@
-import logging
-from logging.handlers import RotatingFileHandler
-
+import importlib
+import pkgutil
 import json
 import os
+
+import logging
+from logging.handlers import RotatingFileHandler
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -10,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
 
+import Handlers
 from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 
@@ -25,7 +28,16 @@ class Spirit(Factory, object):
 		serverName = kwargs["server"]
 		self.server = self.config["Servers"][serverName]
 
-		self.protocol = Penguin if self.server["World"] else Spheniscidae
+		if self.server["World"]:
+			self.protocol = Penguin
+
+			self.loadHandlerModules()
+
+			self.logger.info("Running world server")
+		else:
+			self.protocol = Spheniscidae
+
+			self.logger.info("Running login server")
 
 		# Set up logging
 		generalLogDirectory = os.path.dirname(self.server["Logging"]["General"])
@@ -50,6 +62,31 @@ class Spirit(Factory, object):
 		self.createSession = sessionmaker(bind=self.databaseEngine)
 
 		self.logger.info("Spirit module initialized")
+
+	def getHandlerModules(self):
+		for importer, modname, ispkg in pkgutil.iter_modules(Handlers.__path__):
+			yield modname
+
+	def loadHandlerModules(self):
+		self.logger.info("Loading handler modules")
+
+		for handlerModule in self.getHandlerModules():
+			self.logger.info("Loading " + handlerModule)
+
+			handlerModuleObject = importlib.import_module("Spirit.Handlers." + handlerModule, package="Spirit.Handlers")
+
+			# Exclude the worldHandlers variable at the end
+			handlerModuleMethods = dir(handlerModuleObject)[5:-1]
+
+			handlerModuleHandlers = getattr(handlerModuleObject, "worldHandlers")
+			inverseModuleHandlers = dict((v, k) for k, v in handlerModuleHandlers.iteritems())
+
+			for handlerModuleMethod in handlerModuleMethods:
+				handlerId = inverseModuleHandlers[handlerModuleMethod]
+				handlerModuleMethodObject = getattr(handlerModuleObject, handlerModuleMethod)
+
+				setattr(Penguin, handlerModuleMethod, handlerModuleMethodObject)
+				Penguin.worldHandlers[handlerId] = handlerModuleMethod
 
 	def buildProtocol(self, addr):
 		session = self.createSession()
