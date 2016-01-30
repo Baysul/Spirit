@@ -3,12 +3,15 @@ worldHandlers = {
 	"j#jr": "handleJoinRoom"
 }
 
-# TODO: Verify user id
 def handleJoinWorld(self, data):
 	self.logger.debug("Received joinWorld request")
 
 	playerId = data[4]
 	loginKey = data[5]
+
+	if self.user.Id != int(playerId):
+		self.logger.warn("User sent an invalid player id!")
+		self.transport.loseConnection()
 
 	if self.user.LoginKey == loginKey:
 		self.logger.debug("User's login key is valid!")
