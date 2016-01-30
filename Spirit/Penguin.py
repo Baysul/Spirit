@@ -4,6 +4,8 @@ from Crypto import Crypto
 
 class Penguin(Spheniscidae):
 
+	worldHandlers = {}
+
 	def __init__(self, session):
 		super(Penguin, self).__init__(session)
 
@@ -48,7 +50,6 @@ class Penguin(Spheniscidae):
 				self.user = user
 
 				self.user.ConfirmationHash = None
-				self.user.LoginKey = None
 
 				# Commit for security
 				self.session.commit()
