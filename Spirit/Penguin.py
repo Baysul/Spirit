@@ -7,6 +7,9 @@ class Penguin(Spheniscidae):
 	def __init__(self, session):
 		super(Penguin, self).__init__(session)
 
+		# Defined in handleLogin if authentication is successful
+		self.user = None
+
 		self.logger.info("Penguin class instantiated")
 
 	def handleLogin(self, data):
@@ -39,6 +42,12 @@ class Penguin(Spheniscidae):
 
 			else:
 				self.logger.debug("Everything looks good.")
+
+				self.session.add(user)
+				self.user = user
+
+				self.user.ConfirmationHash = None
+				self.user.LoginKey = None
 
 		except IndexError:
 			self.logger.warn("Client sent invalid login packet")
