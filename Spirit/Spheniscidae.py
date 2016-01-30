@@ -3,6 +3,8 @@ from time import time
 from math import floor
 import xml.etree.ElementTree as ET
 
+from sqlalchemy.exc import InvalidRequestError
+
 from twisted.protocols.basic import LineReceiver
 
 from Crypto import Crypto
@@ -15,6 +17,9 @@ class Spheniscidae(LineReceiver, object):
 	def __init__(self, session):
 		self.logger = logging.getLogger("Spirit")
 		self.session = session
+
+		# Defined once the client requests it (see handleRandomKey)
+		self.randomKey = None
 
 		self.xmlHandlers = {
 			"verChk": self.handleVersionCheck,
@@ -31,7 +36,7 @@ class Spheniscidae(LineReceiver, object):
 
 	def handleLogin(self, data):
 		username = data[0][0].text
-		password = data[0][1].text
+		clientHash = data[0][1].text
 
 		self.logger.info("{0} is attempting to login".format(username))
 
@@ -44,7 +49,7 @@ class Spheniscidae(LineReceiver, object):
 
 		loginHash = Crypto.getLoginHash(databasePassword, self.randomKey)
 
-		if password == loginHash:
+		if clientHash == loginHash:
 			confirmationHash = Crypto.hash(self.randomKey)
 			friendsKey = Crypto.hash(user.Id)
 
@@ -52,8 +57,6 @@ class Spheniscidae(LineReceiver, object):
 
 			user.ConfirmationHash = confirmationHash
 			user.LoginKey = self.randomKey
-
-			self.session.commit()
 
 			loginTime = time()
 
@@ -118,15 +121,18 @@ class Spheniscidae(LineReceiver, object):
 		elif elementTree.tag == "msg":
 			self.logger.debug("Received valid XML data")
 
-			# TODO: try/except?
-			bodyTag = elementTree[0]
-			action = bodyTag.get("action")
+			try:
+				bodyTag = elementTree[0]
+				action = bodyTag.get("action")
 
-			if action in self.xmlHandlers:
-				self.xmlHandlers[action](bodyTag)
+				if action in self.xmlHandlers:
+					self.xmlHandlers[action](bodyTag)
 
-			else:
-				self.logger.warn("Packet did not contain a valid action attribute!")
+				else:
+					self.logger.warn("Packet did not contain a valid action attribute!")
+
+			except IndexError:
+				self.logger.warn("Received invalid XML data (didn't contain a body tag)")
 		else:
 			self.logger.warn("Received invalid XML data!")
 
@@ -135,4 +141,12 @@ class Spheniscidae(LineReceiver, object):
 
 	def connectionLost(self, reason):
 		self.logger.info("Client disconnected")
-		self.session.close()
+
+		try:
+			self.session.commit()
+
+		except InvalidRequestError:
+			self.logger.info("There aren't any transactions in progress")
+
+		finally:
+			self.session.close()
