@@ -49,6 +49,9 @@ class Penguin(Spheniscidae):
 				self.user.ConfirmationHash = None
 				self.user.LoginKey = None
 
+				# Commit for security
+				self.session.commit()
+
 		except IndexError:
 			self.logger.warn("Client sent invalid login packet")
 			self.transport.loseConnection()
