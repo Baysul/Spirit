@@ -5,7 +5,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger("Spirit")
 
-universalHandler = RotatingFileHandler("spirit.log", maxBytes=20480, backupCount=3, encoding="utf-8")
+universalHandler = RotatingFileHandler("spirit.log", maxBytes=2097152, backupCount=3, encoding="utf-8")
 logger.addHandler(universalHandler)
 
 errorHandler = logging.FileHandler("error.log")
