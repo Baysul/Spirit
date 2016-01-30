@@ -12,6 +12,7 @@ class Penguin(Spheniscidae):
 
 		self.logger.info("Penguin class instantiated")
 
+	# TODO: Validate data sent by the client
 	def handleLogin(self, data):
 		try:
 			playerData = data[0][0].text.split("|")
@@ -51,6 +52,8 @@ class Penguin(Spheniscidae):
 
 				# Commit for security
 				self.session.commit()
+
+				self.sendLine("%xt%l%-1%")
 
 		except IndexError:
 			self.logger.warn("Client sent invalid login packet")
