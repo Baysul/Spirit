@@ -139,6 +139,20 @@ class Spheniscidae(LineReceiver, object):
 	def handleWorldData(self, data):
 		self.logger.debug("Received XT data: {0}".format(data))
 
+		# First and last elements are blank
+		parsedData = data.split("%")[1:-1]
+
+		packetId = parsedData[2]
+
+		if packetId in self.worldHandlers:
+			worldHandler = self.worldHandlers[packetId]
+			worldHandlerMethod = getattr(self, worldHandler)
+
+			worldHandlerMethod(parsedData)
+
+		else:
+			self.logger.warn("Received unknown packet! {0}".format(packetId))
+
 	def connectionLost(self, reason):
 		self.logger.info("Client disconnected")
 
