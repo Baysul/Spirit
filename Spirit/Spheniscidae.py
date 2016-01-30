@@ -1,5 +1,6 @@
 import logging
 from time import time
+from math import floor
 import xml.etree.ElementTree as ET
 
 from twisted.protocols.basic import LineReceiver
@@ -7,7 +8,7 @@ from twisted.protocols.basic import LineReceiver
 from Crypto import Crypto
 from Data.User import User
 
-class Spheniscidae(LineReceiver):
+class Spheniscidae(LineReceiver, object):
 
 	delimiter = "\x00"
 
@@ -21,6 +22,13 @@ class Spheniscidae(LineReceiver):
 			"login": self.handleLogin
 		}
 
+	def sendErrorAndDisconnect(self, error):
+		self.sendError(error)
+		self.transport.loseConnection()
+
+	def sendError(self, error):
+		self.sendLine("%xt%e%-1%{0}%".format(error))
+
 	def handleLogin(self, data):
 		username = data[0][0].text
 		password = data[0][1].text
@@ -30,8 +38,7 @@ class Spheniscidae(LineReceiver):
 		user = self.session.query(User).filter_by(Username=username).first()
 
 		if user is None:
-			self.sendLine("%xt%e%-1%101%")
-			return self.transport.loseConnection()
+			return self.sendErrorAndDisconnect(101)
 
 		databasePassword = user.Password
 
@@ -41,23 +48,24 @@ class Spheniscidae(LineReceiver):
 			confirmationHash = Crypto.hash(self.randomKey)
 			friendsKey = Crypto.hash(user.Id)
 
+			self.session.add(user)
+
 			user.ConfirmationHash = confirmationHash
 			user.LoginKey = self.randomKey
 
-			self.session.add(user)
+			self.session.commit()
 
 			loginTime = time()
 
 			# TODO: Take another look at the login packet CP sends
 
 			loginPacket = "%xt%l%-1%{0}|{1}|{2}|{3}|1|45|2|false|true|{4}%{5}%{6}%101,1%spirit@solero.me%" \
-				.format(user.Id, user.Swid, user.Username, user.LoginKey, loginTime, confirmationHash, friendsKey)
+				.format(user.Id, user.Swid, user.Username, user.LoginKey, floor(loginTime), confirmationHash, friendsKey)
 
 			self.sendLine(loginPacket)
 
 		else:
-			self.sendLine("%xt%e%-1%101%")
-			return self.transport.loseConnection()
+			self.sendErrorAndDisconnect(101)
 
 	def handleRandomKey(self, data):
 		self.logger.debug("Received random key request")
