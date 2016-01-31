@@ -19,6 +19,20 @@ class Penguin(Spheniscidae):
 
 		self.logger.info("Penguin class instantiated")
 
+	def addItem(self, itemId, itemCost=0):
+		if itemId in self.inventory:
+			return False
+
+		self.inventory.append(itemId)
+
+		stringifiedInventory = map(str, self.inventory)
+		self.user.Inventory = "%".join(stringifiedInventory)
+
+		self.user.Coins -= itemCost
+
+		addItem = "%xt%ai%-1%{0}%{1}%".format(itemId, self.user.Coins)
+		self.sendLine(addItem)
+
 	# TODO: Puffle values
 	# TODO: Cache string to avoid unnecessary re-generation
 	def getPlayerString(self):
