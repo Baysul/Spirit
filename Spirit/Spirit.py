@@ -104,10 +104,6 @@ class Spirit(Factory, object):
 					if not externalId in self.rooms:
 						self.rooms[externalId] = Room(externalId, internalId)
 
-		# In-case the rooms are being re-loaded
-		if not hasattr(self, "rooms"):
-			self.rooms = {}
-
 		if not os.path.exists("crumbs/rooms.json"):
 			self.downloadCrumbs("http://cdn.clubpenguin.com/play/en/web_service/game_configs/rooms.json")\
 				.addCallback(parseRoomCrumbs)
