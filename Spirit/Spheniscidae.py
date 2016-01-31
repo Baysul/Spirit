@@ -163,6 +163,12 @@ class Spheniscidae(LineReceiver, object):
 		try:
 			self.session.commit()
 
+			if hasattr(self, "room") and not self.room is None:
+				self.room.remove(self)
+
+			if hasattr(self, "user"):
+				self.session.expunge(self.user)
+
 		except InvalidRequestError:
 			self.logger.info("There aren't any transactions in progress")
 
