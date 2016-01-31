@@ -96,7 +96,7 @@ class Spirit(Factory, object):
 	def buildProtocol(self, addr):
 		session = self.createSession()
 
-		player = self.protocol(session)
+		player = self.protocol(session, self)
 
 		return player
 
