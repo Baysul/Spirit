@@ -37,6 +37,9 @@ class Spirit(Factory, object):
 
 			self.loadHandlerModules()
 
+			self.rooms = {}
+			self.loadRooms()
+
 			self.logger.info("Running world server")
 		else:
 			self.protocol = Spheniscidae
@@ -66,9 +69,6 @@ class Spirit(Factory, object):
 		self.createSession = sessionmaker(bind=self.databaseEngine)
 
 		self.players = deque()
-
-		self.loadRooms()
-		self.rooms = {}
 
 		self.logger.info("Spirit module initialized")
 
