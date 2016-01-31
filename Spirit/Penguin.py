@@ -6,6 +6,11 @@ class Penguin(Spheniscidae):
 
 	worldHandlers = {}
 
+	# TODO: Calculate actual age
+	age = 45
+	frame = 1
+	x, y = (0, 0)
+
 	def __init__(self, session):
 		super(Penguin, self).__init__(session)
 
@@ -14,10 +19,41 @@ class Penguin(Spheniscidae):
 
 		self.logger.info("Penguin class instantiated")
 
-	# TODO: Validate data sent by the client
+	# TODO: Puffle values
+	# TODO: Cache string to avoid unnecessary re-generation
+	def getPlayerString(self):
+		playerArray = (
+			self.user.Id,
+			self.user.Username,
+			45,
+			self.user.Color,
+			self.user.Head,
+			self.user.Face,
+			self.user.Neck,
+			self.user.Body,
+			self.user.Hands,
+			self.user.Feet,
+			self.user.Pin,
+			self.user.Photo,
+			self.x,
+			self.y,
+			self.frame,
+			1,
+			1, # Membership days
+			self.user.Avatar,
+			0,
+			self.user.AvatarAttributes
+		)
+
+		playerString = map(str, playerArray)
+		return "|".join(playerString)
+
 	def handleLogin(self, data):
 		try:
 			playerData = data[0][0].text.split("|")
+
+			playerId = playerData[0]
+			playerSwid = playerData[1]
 			username = playerData[2]
 
 			playerHashes = data[0][1].text.split("#")
@@ -30,7 +66,14 @@ class Penguin(Spheniscidae):
 			if user is None:
 				return self.sendErrorAndDisconnect(101)
 
-			dbConfirmationHash = user.ConfirmationHash
+			if int(playerId) != user.Id:
+				self.logger.warn("User sent an invalid player id in the login request")
+				self.transport.loseConnection()
+
+			if playerSwid != user.Swid:
+				self.logger.warn("User sent an invalid swid value in the login request")
+				self.transport.loseConnection()
+
 			loginKey = user.LoginKey
 
 			encryptedPassword = Crypto.encryptPassword(loginKey + self.randomKey) + loginKey
@@ -39,13 +82,10 @@ class Penguin(Spheniscidae):
 				self.logger.debug("Comparing {0} to {1}".format(clientHash, encryptedPassword))
 				self.sendErrorAndDisconnect(101)
 
-			elif confirmationHash != dbConfirmationHash:
-				self.logger.debug("Comparing {0} to {1}".format(confirmationHash, dbConfirmationHash))
+			elif confirmationHash != user.ConfirmationHash:
 				self.sendErrorAndDisconnect(101)
 
 			else:
-				self.logger.debug("Everything looks good.")
-
 				self.session.add(user)
 				self.user = user
 
