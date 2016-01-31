@@ -6,6 +6,8 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
+from collections import deque
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -60,6 +62,9 @@ class Spirit(Factory, object):
 		# TODO - make the engine string retrieve the values from the configuration attribute
 		self.databaseEngine = create_engine('mysql://root@localhost/spirit', pool_recycle=3600)
 		self.createSession = sessionmaker(bind=self.databaseEngine)
+
+		self.players = deque()
+		self.rooms = {}
 
 		self.logger.info("Spirit module initialized")
 
