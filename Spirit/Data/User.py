@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, Integer, String, Boolean, text
+from sqlalchemy import Column, Integer, String, Boolean, Text, text
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -19,6 +19,7 @@ class User(Base):
 	    """'{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}'"""))
     Coins = Column(Integer, nullable=False, server_default=text("'10000'"))
     Moderator = Column(Boolean, nullable=False, default=False)
+    Inventory = Column(Text(collation=u'utf8mb4_unicode_ci'), nullable=False)
     Color = Column(Integer, nullable=False, server_default=text("'1'"))
     Head = Column(Integer, nullable=False, server_default=text("'0'"))
     Face = Column(Integer, nullable=False, server_default=text("'0'"))
