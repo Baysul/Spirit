@@ -11,8 +11,8 @@ class Penguin(Spheniscidae):
 	frame = 1
 	x, y = (0, 0)
 
-	def __init__(self, session):
-		super(Penguin, self).__init__(session)
+	def __init__(self, session, spirit):
+		super(Penguin, self).__init__(session, spirit)
 
 		# Defined in handleLogin if authentication is successful
 		self.user = None
