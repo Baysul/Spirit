@@ -11,12 +11,14 @@ from collections import deque
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
+from twisted.web.client import getPage
 from twisted.internet.protocol import Factory
 
 import Handlers
 from Spheniscidae import Spheniscidae
 from Penguin import Penguin
+from Room import Room
 
 class Spirit(Factory, object):
 
@@ -64,9 +66,54 @@ class Spirit(Factory, object):
 		self.createSession = sessionmaker(bind=self.databaseEngine)
 
 		self.players = deque()
+
+		self.loadRooms()
 		self.rooms = {}
 
 		self.logger.info("Spirit module initialized")
+
+	def downloadCrumbs(self, url):
+		deferredDownload = defer.Deferred()
+
+		def handleRequestComplete(resultData):
+			if not os.path.exists("crumbs"):
+				os.mkdir("crumbs")
+
+			crumbsFile = "crumbs/" + os.path.basename(url)
+
+			with open(crumbsFile, "w") as fileHandler:
+				fileHandler.write(resultData)
+
+			deferredDownload.callback(None)
+
+		getPage(url).addCallback(handleRequestComplete)
+
+		return deferredDownload
+
+	def loadRooms(self):
+		def parseRoomCrumbs(downloadResult=None):
+			with open("crumbs/rooms.json", "r") as fileHandle:
+				rooms = json.load(fileHandle).values()
+
+				internalId = 0
+
+				for room in rooms:
+					externalId = room["room_id"]
+					internalId += 1
+
+					if not externalId in self.rooms:
+						self.rooms[externalId] = Room(externalId, internalId)
+
+		# In-case the rooms are being re-loaded
+		if not hasattr(self, "rooms"):
+			self.rooms = {}
+
+		if not os.path.exists("crumbs/rooms.json"):
+			self.downloadCrumbs("http://cdn.clubpenguin.com/play/en/web_service/game_configs/rooms.json")\
+				.addCallback(parseRoomCrumbs)
+
+		else:
+			parseRoomCrumbs()
 
 	def getHandlerModules(self):
 		for importer, modname, ispkg in pkgutil.iter_modules(Handlers.__path__):
