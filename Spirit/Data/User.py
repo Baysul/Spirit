@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, Integer, String, text
+from sqlalchemy import Column, Integer, String, Boolean, text
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -14,6 +14,8 @@ class User(Base):
     Swid = Column(String(39, u'utf8mb4_unicode_ci'), nullable=False)
     LoginKey = Column(String(32, u'utf8mb4_unicode_ci'))
     ConfirmationHash = Column(String(128, u'utf8mb4_unicode_ci'))
+    Coins = Column(Integer, nullable=False, server_default=text("'10000'"))
+    Moderator = Column(Boolean, nullable=False, default=False)
     Color = Column(Integer, nullable=False, server_default=text("'1'"))
     Head = Column(Integer, nullable=False, server_default=text("'0'"))
     Face = Column(Integer, nullable=False, server_default=text("'0'"))
