@@ -14,6 +14,9 @@ class User(Base):
     Swid = Column(String(39, u'utf8mb4_unicode_ci'), nullable=False)
     LoginKey = Column(String(32, u'utf8mb4_unicode_ci'))
     ConfirmationHash = Column(String(128, u'utf8mb4_unicode_ci'))
+    Avatar = Column(Integer, nullable=False)
+    AvatarAttributes = Column(String(98, u'utf8mb4_unicode_ci'), nullable=False,server_default=text(
+	    """'{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}'"""))
     Coins = Column(Integer, nullable=False, server_default=text("'10000'"))
     Moderator = Column(Boolean, nullable=False, default=False)
     Color = Column(Integer, nullable=False, server_default=text("'1'"))
