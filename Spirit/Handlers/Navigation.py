@@ -34,4 +34,15 @@ def handleJoinWorld(self, data):
 	self.spirit.rooms[100].add(self)
 
 def handleJoinRoom(self, data):
-	self.logger.debug("Received joinRoom request")
+	roomId = int(data[4])
+
+	if roomId in self.spirit.rooms:
+		x, y = data[5:7]
+
+		if x.isdigit() and y.isdigit():
+			self.x = int(x)
+			self.y = int(y)
+			self.frame = 1
+
+			self.room.remove(self)
+			self.spirit.rooms[roomId].add(self)
