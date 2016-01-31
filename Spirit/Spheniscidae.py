@@ -16,8 +16,11 @@ class Spheniscidae(LineReceiver, object):
 
 	def __init__(self, session, spirit):
 		self.logger = logging.getLogger("Spirit")
+
 		self.session = session
 		self.spirit = spirit
+
+		self.spirit.players.append(self)
 
 		# Defined once the client requests it (see handleRandomKey)
 		self.randomKey = None
@@ -154,6 +157,8 @@ class Spheniscidae(LineReceiver, object):
 
 	def connectionLost(self, reason):
 		self.logger.info("Client disconnected")
+
+		self.spirit.players.remove(self)
 
 		try:
 			self.session.commit()
