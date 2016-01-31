@@ -40,6 +40,9 @@ class Spirit(Factory, object):
 			self.rooms = {}
 			self.loadRooms()
 
+			self.items = {}
+			self.loadItems()
+
 			self.logger.info("Running world server")
 		else:
 			self.protocol = Spheniscidae
@@ -90,6 +93,24 @@ class Spirit(Factory, object):
 
 		return deferredDownload
 
+	def loadItems(self):
+		def parseItemCrumbs(downloadResult=None):
+			with open("crumbs/paper_items.json", "r") as fileHandle:
+				items = json.load(fileHandle)
+
+				for item in items:
+					itemId = item["paper_item_id"]
+					self.items[itemId] = item["cost"]
+
+			self.logger.info("{0} items loaded".format(len(self.items)))
+
+		if not os.path.exists("crumbs/items.json"):
+			self.downloadCrumbs("http://cdn.clubpenguin.com/play/en/web_service/game_configs/paper_items.json")\
+				.addCallback(parseItemCrumbs)
+
+		else:
+			parseItemCrumbs()
+
 	def loadRooms(self):
 		def parseRoomCrumbs(downloadResult=None):
 			with open("crumbs/rooms.json", "r") as fileHandle:
@@ -103,6 +124,8 @@ class Spirit(Factory, object):
 
 					if not externalId in self.rooms:
 						self.rooms[externalId] = Room(externalId, internalId)
+
+			self.logger.info("{0} rooms loaded".format(len(self.rooms)))
 
 		if not os.path.exists("crumbs/rooms.json"):
 			self.downloadCrumbs("http://cdn.clubpenguin.com/play/en/web_service/game_configs/rooms.json")\
