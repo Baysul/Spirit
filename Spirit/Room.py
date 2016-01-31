@@ -30,4 +30,4 @@ class Room(object):
 	def remove(self, player):
 		self.players.remove(player)
 
-		self.send("%xt%rp%-1%{0}%".format(player.id))
+		self.send("%xt%rp%-1%{0}%".format(player.user.Id))
