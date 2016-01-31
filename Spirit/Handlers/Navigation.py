@@ -31,5 +31,7 @@ def handleJoinWorld(self, data):
 	                                                                   self.age)
 	self.sendLine("%xt%lp%-1%{0}%".format(loadPlayer))
 
+	self.spirit.rooms[100].add(self)
+
 def handleJoinRoom(self, data):
 	self.logger.debug("Received joinRoom request")
