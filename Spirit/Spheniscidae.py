@@ -14,9 +14,10 @@ class Spheniscidae(LineReceiver, object):
 
 	delimiter = "\x00"
 
-	def __init__(self, session):
+	def __init__(self, session, spirit):
 		self.logger = logging.getLogger("Spirit")
 		self.session = session
+		self.spirit = spirit
 
 		# Defined once the client requests it (see handleRandomKey)
 		self.randomKey = None
