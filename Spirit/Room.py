@@ -12,7 +12,7 @@ class Room(object):
 			player.sendLine(data)
 
 	def generateRoomString(self):
-		roomString = "%".join([player.generatePlayerString() for player in self.players])
+		roomString = "%".join([player.getPlayerString() for player in self.players])
 
 		return roomString
 
