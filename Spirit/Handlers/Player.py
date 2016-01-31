@@ -1,6 +1,10 @@
 worldHandlers = {
-	"u#sp": "handleSendPlayerMove"
+	"u#sp": "handleSendPlayerMove",
+	"u#h": "handleSendHeartbeat"
 }
+
+def handleSendHeartbeat(self, data):
+	self.sendLine("%xt%h%-1%")
 
 def handleSendPlayerMove(self, data):
 	x, y = data[4:6]
