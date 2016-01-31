@@ -56,11 +56,9 @@ class Spheniscidae(LineReceiver, object):
 			self.session.add(user)
 
 			user.ConfirmationHash = confirmationHash
-			user.LoginKey = self.randomKey
+			user.LoginKey = Crypto.hash(self.randomKey)
 
 			loginTime = time()
-
-			# TODO: Take another look at the login packet CP sends
 
 			loginPacket = "%xt%l%-1%{0}|{1}|{2}|{3}|1|45|2|false|true|{4}%{5}%{6}%101,1%spirit@solero.me%" \
 				.format(user.Id, user.Swid, user.Username, user.LoginKey, floor(loginTime), confirmationHash, friendsKey)
