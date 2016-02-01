@@ -24,7 +24,7 @@ def handleBuyInventory(self, data):
 	if self.user.Coins < itemCost:
 		return self.sendError(401)
 
-	self.addItem(itemId)
+	self.addItem(itemId, itemCost)
 
 
 def handleGetInventoryList(self, data):
