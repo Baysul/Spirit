@@ -20,10 +20,11 @@ class Room(object):
 		self.players.append(player)
 
 		joinRoom = "%xt%jr%{0}%{1}%{2}%".format(self.internalId, self.externalId, self.generateRoomString())
-		addPlayer = "%xt%ap%{0}%{1}%".format(self.internalId, self.generateRoomString())
+		addPlayer = "%xt%ap%{0}%{1}%".format(self.internalId, player.getPlayerString())
 
 		player.sendLine(joinRoom)
-		player.sendLine(addPlayer)
+
+		self.send(addPlayer)
 
 		player.room = self
 
