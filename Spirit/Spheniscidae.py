@@ -100,14 +100,6 @@ class Spheniscidae(LineReceiver, object):
 			self.logger.error("Received a version-check packet from a client without a version attribute")
 			self.loseConnection()
 
-	def lineReceived(self, data):
-		self.logger.debug("Received data: {0}".format(data))
-
-		if data.startswith("<"):
-			self.handleXmlData(data)
-		else:
-			self.handleWorldData(data)
-
 	# TODO: Replace * with actual port
 	def sendPolicyFile(self):
 		self.sendLine("<cross-domain-policy><allow-access-from domain='*' to-ports='*' /></cross-domain-policy>")
@@ -154,6 +146,17 @@ class Spheniscidae(LineReceiver, object):
 
 		else:
 			self.logger.warn("Received unknown packet! {0}".format(packetId))
+
+	def sendLine(self, line):
+		super(Spheniscidae, self).sendLine(line)
+
+		self.logger.debug("Outgoing data: {0}".format(line))
+
+	def lineReceived(self, data):
+		if data.startswith("<"):
+			self.handleXmlData(data)
+		else:
+			self.handleWorldData(data)
 
 	def connectionLost(self, reason):
 		self.logger.info("Client disconnected")
