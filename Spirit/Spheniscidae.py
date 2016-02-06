@@ -1,6 +1,7 @@
 import logging
 from time import time
 from math import floor
+from collections import deque
 import xml.etree.ElementTree as ET
 
 from sqlalchemy.exc import InvalidRequestError
@@ -146,6 +147,19 @@ class Spheniscidae(LineReceiver, object):
 
 		else:
 			self.logger.warn("Received unknown packet! {0}".format(packetId))
+
+	# TODO: Clean
+	def sendXt(self, *data):
+		data = deque(data)
+
+		handlerId = data.popleft()
+		internalId = self.room.internalId if not self.room is None else -1
+		mappedData = map(str, data)
+
+		xtData = "%".join(mappedData)
+
+		line = "%xt%{0}%{1}%{2}%".format(handlerId, internalId, xtData)
+		self.sendLine(line)
 
 	def sendLine(self, line):
 		super(Spheniscidae, self).sendLine(line)
