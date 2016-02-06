@@ -17,6 +17,9 @@ class Penguin(Spheniscidae):
 		# Defined in handleLogin if authentication is successful
 		self.user = None
 
+		# Defined when player joins a room
+		self.room = None
+
 		self.logger.info("Penguin class instantiated")
 
 	def addItem(self, itemId, itemCost=0):
