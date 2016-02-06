@@ -6,8 +6,6 @@ worldHandlers = {
 def handleJoinWorld(self, data):
 	from time import time
 
-	self.logger.debug("Received joinWorld request")
-
 	playerId = data[4]
 	loginKey = data[5]
 
