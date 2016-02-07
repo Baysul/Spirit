@@ -15,6 +15,7 @@ from twisted.internet import reactor, defer
 from twisted.web.client import getPage
 from twisted.internet.protocol import Factory
 
+import Handlers, Plugins
 from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 from Room import Room
@@ -30,23 +31,6 @@ class Spirit(Factory, object):
 
 		serverName = kwargs["server"]
 		self.server = self.config["Servers"][serverName]
-
-		if self.server["World"]:
-			self.protocol = Penguin
-
-			self.loadHandlerModules()
-
-			self.rooms = {}
-			self.loadRooms()
-
-			self.items = {}
-			self.loadItems()
-
-			self.logger.info("Running world server")
-		else:
-			self.protocol = Spheniscidae
-
-			self.logger.info("Running login server")
 
 		# Set up logging
 		generalLogDirectory = os.path.dirname(self.server["Logging"]["General"])
@@ -77,6 +61,48 @@ class Spirit(Factory, object):
 		self.players = deque()
 
 		self.logger.info("Spirit module initialized")
+
+		self.loadPlugins()
+
+		if self.server["World"]:
+			self.protocol = Penguin
+
+			self.loadHandlerModules()
+
+			self.rooms = {}
+			self.loadRooms()
+
+			self.items = {}
+			self.loadItems()
+
+			self.logger.info("Running world server")
+		else:
+			self.protocol = Spheniscidae
+
+			self.logger.info("Running login server")
+
+	def loadPlugins(self):
+		if not hasattr(self, "plugins"):
+			self.plugins = {}
+
+		pluginModules = self.getPackageModules(Plugins)
+
+		for pluginModule in pluginModules:
+			self.loadPlugin(pluginModule)
+
+	def loadPlugin(self, pluginName):
+		packageName = "Spirit.Plugins.{0}".format(pluginName)
+
+		pluginModule = importlib.import_module(packageName, package=packageName)
+		pluginObject = getattr(pluginModule, pluginName)()
+
+		self.plugins[pluginName] = pluginObject
+
+		pluginObject.ready()
+
+	def getPackageModules(self, package):
+		for importer, modname, ispkg in pkgutil.iter_modules(package.__path__):
+			yield modname
 
 	def downloadCrumbs(self, url):
 		deferredDownload = defer.Deferred()
@@ -137,14 +163,8 @@ class Spirit(Factory, object):
 		else:
 			parseRoomCrumbs()
 
-	def getHandlerModules(self):
-		import Handlers
-
-		for importer, modname, ispkg in pkgutil.iter_modules(Handlers.__path__):
-			yield modname
-
 	def loadHandlerModules(self):
-		for handlerModule in self.getHandlerModules():
+		for handlerModule in self.getPackageModules(Handlers):
 			importlib.import_module("Spirit.Handlers." + handlerModule, package="Spirit.Handlers")
 
 		self.logger.info("Handler modules loaded")
