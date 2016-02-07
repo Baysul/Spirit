@@ -140,7 +140,11 @@ class Spheniscidae(LineReceiver, object):
 
 		packetId = parsedData[2]
 
-		self.event.emit(packetId, self, parsedData)
+		if self.event.exists(packetId):
+			self.event.emit(packetId, self, parsedData)
+
+		else:
+			self.logger.debug("Handler for {0} doesn't exist!".format(packetId))
 
 	# TODO: Clean
 	def sendXt(self, *data):
