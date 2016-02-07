@@ -5,9 +5,9 @@ from collections import deque
 import xml.etree.ElementTree as ET
 
 from sqlalchemy.exc import InvalidRequestError
-
 from twisted.protocols.basic import LineReceiver
 
+from Events import Events
 from Crypto import Crypto
 from Data.User import User
 
@@ -31,6 +31,8 @@ class Spheniscidae(LineReceiver, object):
 			"rndK": self.handleRandomKey,
 			"login": self.handleLogin
 		}
+
+		self.event = Events()
 
 	def sendErrorAndDisconnect(self, error):
 		self.sendError(error)
@@ -139,14 +141,7 @@ class Spheniscidae(LineReceiver, object):
 
 		packetId = parsedData[2]
 
-		if packetId in self.worldHandlers:
-			worldHandler = self.worldHandlers[packetId]
-			worldHandlerMethod = getattr(self, worldHandler)
-
-			worldHandlerMethod(parsedData)
-
-		else:
-			self.logger.warn("Received unknown packet! {0}".format(packetId))
+		self.event.emit(packetId, self, parsedData)
 
 	# TODO: Clean
 	def sendXt(self, *data):
