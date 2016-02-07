@@ -144,20 +144,7 @@ class Spirit(Factory, object):
 		for handlerModule in self.getHandlerModules():
 			self.logger.info("Loading " + handlerModule)
 
-			handlerModuleObject = importlib.import_module("Spirit.Handlers." + handlerModule, package="Spirit.Handlers")
-
-			# Exclude the worldHandlers variable at the end
-			handlerModuleMethods = dir(handlerModuleObject)[5:-1]
-
-			handlerModuleHandlers = getattr(handlerModuleObject, "worldHandlers")
-			inverseModuleHandlers = dict((v, k) for k, v in handlerModuleHandlers.iteritems())
-
-			for handlerModuleMethod in handlerModuleMethods:
-				handlerId = inverseModuleHandlers[handlerModuleMethod]
-				handlerModuleMethodObject = getattr(handlerModuleObject, handlerModuleMethod)
-
-				setattr(Penguin, handlerModuleMethod, handlerModuleMethodObject)
-				Penguin.worldHandlers[handlerId] = handlerModuleMethod
+			importlib.import_module("Spirit.Handlers." + handlerModule, package="Spirit.Handlers")
 
 	def buildProtocol(self, addr):
 		session = self.createSession()
