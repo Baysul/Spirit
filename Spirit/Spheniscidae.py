@@ -1,7 +1,6 @@
 import logging
 from time import time
 from math import floor
-from collections import deque
 import xml.etree.ElementTree as ET
 
 from sqlalchemy.exc import InvalidRequestError
@@ -145,9 +144,9 @@ class Spheniscidae(LineReceiver, object):
 
 	# TODO: Clean
 	def sendXt(self, *data):
-		data = deque(data)
+		data = list(data)
 
-		handlerId = data.popleft()
+		handlerId = data.pop(0)
 		internalId = self.room.internalId if not self.room is None else -1
 		mappedData = map(str, data)
 
