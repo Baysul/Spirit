@@ -151,7 +151,7 @@ class Spheniscidae(LineReceiver, object):
 		data = list(data)
 
 		handlerId = data.pop(0)
-		internalId = self.room.internalId if not self.room is None else -1
+		internalId = self.room.internalId if self.room is not None else -1
 		mappedData = map(str, data)
 
 		xtData = "%".join(mappedData)
@@ -178,7 +178,7 @@ class Spheniscidae(LineReceiver, object):
 		try:
 			self.session.commit()
 
-			if hasattr(self, "room") and not self.room is None:
+			if hasattr(self, "room") and self.room is not None:
 				self.room.remove(self)
 
 			if hasattr(self, "user"):
