@@ -15,7 +15,6 @@ from twisted.internet import reactor, defer
 from twisted.web.client import getPage
 from twisted.internet.protocol import Factory
 
-import Handlers
 from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 from Room import Room
@@ -67,8 +66,12 @@ class Spirit(Factory, object):
 		errorHandler.setLevel(logging.ERROR)
 		self.logger.addHandler(errorHandler)
 
-		# TODO - make the engine string retrieve the values from the configuration attribute
-		self.databaseEngine = create_engine('mysql://root@localhost/spirit', pool_recycle=3600)
+		engineString = "mysql://{0}:{1}@{2}/{3}".format(self.config["Database"]["Username"],
+		                                                self.config["Database"]["Password"],
+		                                                self.config["Database"]["Address"],
+		                                                self.config["Database"]["Name"])
+
+		self.databaseEngine = create_engine(engineString, pool_recycle=3600)
 		self.createSession = sessionmaker(bind=self.databaseEngine)
 
 		self.players = deque()
@@ -135,16 +138,16 @@ class Spirit(Factory, object):
 			parseRoomCrumbs()
 
 	def getHandlerModules(self):
+		import Handlers
+
 		for importer, modname, ispkg in pkgutil.iter_modules(Handlers.__path__):
 			yield modname
 
 	def loadHandlerModules(self):
-		self.logger.info("Loading handler modules")
-
 		for handlerModule in self.getHandlerModules():
-			self.logger.info("Loading " + handlerModule)
-
 			importlib.import_module("Spirit.Handlers." + handlerModule, package="Spirit.Handlers")
+
+		self.logger.info("Handler modules loaded")
 
 	def buildProtocol(self, addr):
 		session = self.createSession()
