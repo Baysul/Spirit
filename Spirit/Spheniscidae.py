@@ -1,6 +1,5 @@
 import logging
 from time import time
-from math import floor
 import xml.etree.ElementTree as ET
 
 from sqlalchemy.exc import InvalidRequestError
