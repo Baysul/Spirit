@@ -16,7 +16,7 @@ def handleGetPlayerInfoById(self, data):
 			username = self.user.Username
 
 		else:
-			playerModel = self.session.query(User).options(load_only("Username", "Swid"))\
+			playerModel = self.session.query(User).options(load_only("Username", "Swid")) \
 				.filter_by(Id=playerId).first()
 
 			if playerModel is None:
@@ -25,12 +25,11 @@ def handleGetPlayerInfoById(self, data):
 			username = playerModel.Username
 			playerSwid = playerModel.Swid
 
-		playerInfoById = "%xt%pbi%{0}%{1}%{2}%{3}%".format(self.room.internalId, playerSwid, playerId, username)
-		self.sendLine(playerInfoById)
+		self.sendXt("pbi", playerSwid, playerId, username)
 
 @events.on("u#h")
 def handleSendHeartbeat(self, data):
-	self.sendLine("%xt%h%-1%")
+	self.sendXt("h")
 
 @events.on("u#sp")
 def handleSendPlayerMove(self, data):
@@ -40,5 +39,4 @@ def handleSendPlayerMove(self, data):
 		self.x = int(x)
 		self.y = int(y)
 
-		playerMovement = "%xt%sp%{0}%{1}%{2}%{3}%".format(self.room.internalId, self.user.Id, self.x, self.y)
-		self.room.send(playerMovement)
+		self.room.sendXt("sp", self.user.Id, self.x, self.y)

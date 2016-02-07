@@ -7,7 +7,7 @@ def handleSendUpdatePlayerColour(self, data):
 
 	if itemId.isdigit():
 		self.user.Color = int(itemId)
-		self.room.send("%xt%upc%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upc", self.user.Id, itemId)
 
 @events.on("s#uph")
 def handleSendUpdatePlayerHead(self, data):
@@ -15,7 +15,7 @@ def handleSendUpdatePlayerHead(self, data):
 
 	if itemId.isdigit():
 		self.user.Head = int(itemId)
-		self.room.send("%xt%uph%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("uph", self.user.Id, itemId)
 
 @events.on("s#upf")
 def handleSendUpdatePlayerFace(self, data):
@@ -23,7 +23,7 @@ def handleSendUpdatePlayerFace(self, data):
 
 	if itemId.isdigit():
 		self.user.Face = int(itemId)
-		self.room.send("%xt%upf%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upf", self.user.Id, itemId)
 
 @events.on("s#upn")
 def handleSendUpdatePlayerNeck(self, data):
@@ -31,7 +31,7 @@ def handleSendUpdatePlayerNeck(self, data):
 
 	if itemId.isdigit():
 		self.user.Neck = int(itemId)
-		self.room.send("%xt%upn%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upn", self.user.Id, itemId)
 
 @events.on("s#upb")
 def handleSendUpdatePlayerBody(self, data):
@@ -39,7 +39,7 @@ def handleSendUpdatePlayerBody(self, data):
 
 	if itemId.isdigit():
 		self.user.Body = int(itemId)
-		self.room.send("%xt%upb%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upb", self.user.Id, itemId)
 
 @events.on("s#upa")
 def handleSendUpdatePlayerHand(self, data):
@@ -47,7 +47,7 @@ def handleSendUpdatePlayerHand(self, data):
 
 	if itemId.isdigit():
 		self.user.Hands = int(itemId)
-		self.room.send("%xt%upa%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upa", self.user.Id, itemId)
 
 @events.on("s#upe")
 def handleSendUpdatePlayerFeet(self, data):
@@ -55,7 +55,7 @@ def handleSendUpdatePlayerFeet(self, data):
 
 	if itemId.isdigit():
 		self.user.Feet = int(itemId)
-		self.room.send("%xt%upe%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upe", self.user.Id, itemId)
 
 @events.on("s#upl")
 def handleSendUpdatePlayerFlag(self, data):
@@ -63,7 +63,7 @@ def handleSendUpdatePlayerFlag(self, data):
 
 	if itemId.isdigit():
 		self.user.Pin = int(itemId)
-		self.room.send("%xt%upl%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upl", self.user.Id, itemId)
 
 @events.on("s#upp")
 def handleSendUpdatePlayerPhoto(self, data):
@@ -71,4 +71,4 @@ def handleSendUpdatePlayerPhoto(self, data):
 
 	if itemId.isdigit():
 		self.user.Photo = int(itemId)
-		self.room.send("%xt%upp%{0}%{1}%{2}%".format(self.room.internalId, self.user.Id, itemId))
+		self.room.sendXt("upp", self.user.Id, itemId)

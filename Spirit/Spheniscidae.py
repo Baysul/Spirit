@@ -19,6 +19,7 @@ class Spheniscidae(LineReceiver, object):
 
 		self.session = session
 		self.spirit = spirit
+		self.room = None
 
 		self.spirit.players.append(self)
 
@@ -38,7 +39,7 @@ class Spheniscidae(LineReceiver, object):
 		self.transport.loseConnection()
 
 	def sendError(self, error):
-		self.sendLine("%xt%e%-1%{0}%".format(error))
+		self.sendXt("e", error)
 
 	def handleLogin(self, data):
 		username = data[0][0].text
@@ -66,10 +67,10 @@ class Spheniscidae(LineReceiver, object):
 
 			loginTime = time()
 
-			loginPacket = "%xt%l%-1%{0}|{1}|{2}|{3}|1|45|2|false|true|{4}%{5}%{6}%101,1%spirit@solero.me%" \
-				.format(user.Id, user.Swid, user.Username, user.LoginKey, floor(loginTime), confirmationHash, friendsKey)
+			userData = "{0}|{1}|{2}|{3}|1|45|2|false|true|{4}".format(user.Id, user.Swid, user.Username,
+			                                                          user.LoginKey, loginTime)
 
-			self.sendLine(loginPacket)
+			self.sendXt("l", userData, confirmationHash, friendsKey, "101,1", "spirit@solero.me")
 
 		else:
 			self.sendErrorAndDisconnect(101)

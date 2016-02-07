@@ -35,4 +35,4 @@ def handleGetInventoryList(self, data):
 		self.inventory = []
 
 	finally:
-		self.sendLine("%xt%gi%-1%" + self.user.Inventory + "%")
+		self.sendXt("gi", self.user.Inventory)

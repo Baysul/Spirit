@@ -1,12 +1,10 @@
+from time import time
+
 from ..Events import Events
 events = Events()
 
 @events.on("j#js")
 def handleJoinWorld(self, data):
-	print "Handling joinWorld request"
-
-	from time import time
-
 	playerId = data[4]
 	loginKey = data[5]
 
@@ -20,15 +18,14 @@ def handleJoinWorld(self, data):
 	self.user.LoginKey = None
 	self.session.commit()
 
-	self.sendLine("%xt%js%-1%1%0%{0}%1%".format("1" if self.user.Moderator else "0"))
+	isModerator = 1 if self.user.Moderator else 0
 
-	playerString = self.getPlayerString()
+	self.sendXt("js", 1, 0, isModerator, 1)
+
 	loginTime = time()
 
-	# TODO - update?
-	loadPlayer = "{0}|%{1}%0%1440%{2}%{3}%0%7521%%7%1%0%211843".format(playerString, self.user.Coins, str(loginTime),
-	                                                                   self.age)
-	self.sendLine("%xt%lp%-1%{0}%".format(loadPlayer))
+	self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
+	            loginTime, self.age, 0, 7521, "", 7, 1, 0, 211843)
 
 	self.spirit.rooms[100].add(self)
 

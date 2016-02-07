@@ -17,9 +17,6 @@ class Penguin(Spheniscidae):
 		# Defined in handleLogin if authentication is successful
 		self.user = None
 
-		# Defined when player joins a room
-		self.room = None
-
 		self.logger.info("Penguin class instantiated")
 
 	def addItem(self, itemId, itemCost=0):
@@ -33,8 +30,7 @@ class Penguin(Spheniscidae):
 
 		self.user.Coins -= itemCost
 
-		addItem = "%xt%ai%-1%{0}%{1}%".format(itemId, self.user.Coins)
-		self.sendLine(addItem)
+		self.sendXt("ai", itemId, self.user.Coins)
 
 	# TODO: Puffle values
 	# TODO: Cache string to avoid unnecessary re-generation
@@ -111,7 +107,7 @@ class Penguin(Spheniscidae):
 				# Commit for security
 				self.session.commit()
 
-				self.sendLine("%xt%l%-1%")
+				self.sendXt("l")
 
 		except IndexError:
 			self.logger.warn("Client sent invalid login packet")
