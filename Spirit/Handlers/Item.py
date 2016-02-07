@@ -5,8 +5,6 @@ events = Events()
 def handleBuyInventory(self, data):
 	itemId = data[4]
 
-	self.logger.debug("Purchasing item {0}".format(itemId))
-
 	if not itemId.isdigit():
 		return self.sendError(402)
 
@@ -34,7 +32,6 @@ def handleGetInventoryList(self, data):
 		self.inventory = inventoryArray
 
 	except ValueError:
-		self.logger.debug("Empty inventory string (?)")
 		self.inventory = []
 
 	finally:
