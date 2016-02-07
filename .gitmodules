@@ -1,0 +1,3 @@
+[submodule "Spirit/Events"]
+	path = Spirit/Events
+	url = https://github.com/TunnelBlanket/Events
