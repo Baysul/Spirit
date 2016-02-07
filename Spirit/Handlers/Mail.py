@@ -1,7 +1,7 @@
-worldHandlers = {
-	"l#mst": "handleStartMailEngine"
-}
+from ..Events import Events
+events = Events()
 
-# TODO: Implement actual mail system
+@events.on("l#mst")
 def handleStartMailEngine(self, data):
+	# TODO: Implement actual mail system
 	self.sendLine("%xt%mst%-1%0%0%")

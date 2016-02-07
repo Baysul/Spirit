@@ -1,9 +1,7 @@
-worldHandlers = {
-	"u#sp": "handleSendPlayerMove",
-	"u#h": "handleSendHeartbeat",
-	"u#pbi": "handleGetPlayerInfoById"
-}
+from ..Events import Events
+events = Events()
 
+@events.on("u#pbi")
 def handleGetPlayerInfoById(self, data):
 	from sqlalchemy.orm import load_only
 	from ..Data.User import User
@@ -30,9 +28,11 @@ def handleGetPlayerInfoById(self, data):
 		playerInfoById = "%xt%pbi%{0}%{1}%{2}%{3}%".format(self.room.internalId, playerSwid, playerId, username)
 		self.sendLine(playerInfoById)
 
+@events.on("u#h")
 def handleSendHeartbeat(self, data):
 	self.sendLine("%xt%h%-1%")
 
+@events.on("u#sp")
 def handleSendPlayerMove(self, data):
 	x, y = data[4:6]
 

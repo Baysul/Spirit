@@ -1,9 +1,10 @@
-worldHandlers = {
-	"j#js": "handleJoinWorld",
-	"j#jr": "handleJoinRoom"
-}
+from ..Events import Events
+events = Events()
 
+@events.on("j#js")
 def handleJoinWorld(self, data):
+	print "Handling joinWorld request"
+
 	from time import time
 
 	playerId = data[4]
@@ -31,6 +32,7 @@ def handleJoinWorld(self, data):
 
 	self.spirit.rooms[100].add(self)
 
+@events.on("j#jr")
 def handleJoinRoom(self, data):
 	roomId = int(data[4])
 

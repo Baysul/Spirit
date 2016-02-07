@@ -1,8 +1,7 @@
-worldHandlers = {
-	"i#gi": "handleGetInventoryList",
-	"i#ai": "handleBuyInventory"
-}
+from ..Events import Events
+events = Events()
 
+@events.on("i#ai")
 def handleBuyInventory(self, data):
 	itemId = data[4]
 
@@ -26,7 +25,7 @@ def handleBuyInventory(self, data):
 
 	self.addItem(itemId, itemCost)
 
-
+@events.on("i#gi")
 def handleGetInventoryList(self, data):
 	inventoryArray = self.user.Inventory.split("%")
 
