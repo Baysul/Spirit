@@ -69,10 +69,8 @@ class Spirit(Factory, object):
 
 			self.loadHandlerModules()
 
-			self.rooms = {}
 			self.loadRooms()
 
-			self.items = {}
 			self.loadItems()
 
 			self.logger.info("Running world server")
@@ -123,6 +121,9 @@ class Spirit(Factory, object):
 		return deferredDownload
 
 	def loadItems(self):
+		if not hasattr(self, "items"):
+			self.items = {}
+
 		def parseItemCrumbs(downloadResult=None):
 			with open("crumbs/paper_items.json", "r") as fileHandle:
 				items = json.load(fileHandle)
@@ -141,6 +142,9 @@ class Spirit(Factory, object):
 			parseItemCrumbs()
 
 	def loadRooms(self):
+		if not hasattr(self, "rooms"):
+			self.rooms = {}
+
 		def parseRoomCrumbs(downloadResult=None):
 			with open("crumbs/rooms.json", "r") as fileHandle:
 				rooms = json.load(fileHandle).values()
