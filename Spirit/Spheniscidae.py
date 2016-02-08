@@ -162,6 +162,8 @@ class Spheniscidae(LineReceiver, object):
 	def sendLine(self, line):
 		super(Spheniscidae, self).sendLine(line)
 
+		self.event.emit("sent", self, line)
+
 		self.logger.debug("Outgoing data: {0}".format(line))
 
 	def lineReceived(self, data):
