@@ -90,13 +90,17 @@ class Spirit(Factory, object):
 
 	def loadPlugin(self, pluginName):
 		packageName = "Spirit.Plugins.{0}".format(pluginName)
-
 		pluginModule = importlib.import_module(packageName, package=packageName)
+
 		pluginObject = getattr(pluginModule, pluginName)()
 
-		self.plugins[pluginName] = pluginObject
+		if Plugins.Plugin.providedBy(pluginObject):
+			self.plugins[pluginName] = pluginObject
 
-		pluginObject.ready()
+			pluginObject.ready()
+
+		else:
+			self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginName))
 
 	def getPackageModules(self, package):
 		for importer, modname, ispkg in pkgutil.iter_modules(package.__path__):
