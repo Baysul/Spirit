@@ -132,6 +132,8 @@ class Spheniscidae(LineReceiver, object):
 		else:
 			self.logger.warn("Received invalid XML data!")
 
+		self.event.emit("received-xml", elementTree)
+
 	def handleWorldData(self, data):
 		self.logger.debug("Received XT data: {0}".format(data))
 
