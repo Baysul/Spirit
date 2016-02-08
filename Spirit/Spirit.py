@@ -88,23 +88,47 @@ class Spirit(Factory, object):
 		for pluginModule in pluginModules:
 			self.loadPlugin(pluginModule)
 
-	def loadPlugin(self, pluginName):
-		packageName = "Spirit.Plugins.{0}".format(pluginName)
-		pluginModule = importlib.import_module(packageName, package=packageName)
+	def loadPlugin(self, plugin):
+		pluginModule, pluginClass = plugin
 
-		pluginObject = getattr(pluginModule, pluginName)()
+		pluginObject = getattr(pluginModule, pluginClass)()
 
 		if Plugins.Plugin.providedBy(pluginObject):
-			self.plugins[pluginName] = pluginObject
+			self.plugins[pluginClass] = pluginObject
 
 			pluginObject.ready()
 
 		else:
-			self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginName))
+			self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
+
+	def loadHandlerModules(self):
+		for handlerModule in self.getPackageModules(Handlers):
+			importlib.import_module(handlerModule)
+
+		self.logger.info("Handler modules loaded")
 
 	def getPackageModules(self, package):
-		for importer, modname, ispkg in pkgutil.iter_modules(package.__path__):
-			yield modname
+		packageModules = []
+
+		for importer, moduleName, isPackage in pkgutil.iter_modules(package.__path__):
+			fullModuleName = "{0}.{1}".format(package.__name__, moduleName)
+
+			if isPackage:
+				subpackageObject = importlib.import_module(fullModuleName, package=package.__path__)
+				subpackageObjectDirectory = dir(subpackageObject)
+
+				if "Plugin" in subpackageObjectDirectory:
+					packageModules.append((subpackageObject, moduleName))
+
+					continue
+
+				subPackageModules = self.getPackageModules(subpackageObject)
+
+				packageModules = packageModules + subPackageModules
+			else:
+				packageModules.append(fullModuleName)
+
+		return packageModules
 
 	def downloadCrumbs(self, url):
 		deferredDownload = defer.Deferred()
@@ -170,12 +194,6 @@ class Spirit(Factory, object):
 
 		else:
 			parseRoomCrumbs()
-
-	def loadHandlerModules(self):
-		for handlerModule in self.getPackageModules(Handlers):
-			importlib.import_module("Spirit.Handlers." + handlerModule, package="Spirit.Handlers")
-
-		self.logger.info("Handler modules loaded")
 
 	def buildProtocol(self, addr):
 		session = self.createSession()
