@@ -1,13 +1,10 @@
 import logging
-from time import time
 import xml.etree.ElementTree as ET
 
 from sqlalchemy.exc import InvalidRequestError
 from twisted.protocols.basic import LineReceiver
 
 from Events import Events
-from Crypto import Crypto
-from Data.User import User
 
 class Spheniscidae(LineReceiver, object):
 
@@ -25,12 +22,6 @@ class Spheniscidae(LineReceiver, object):
 		# Defined once the client requests it (see handleRandomKey)
 		self.randomKey = None
 
-		self.xmlHandlers = {
-			"verChk": self.handleVersionCheck,
-			"rndK": self.handleRandomKey,
-			"login": self.handleLogin
-		}
-
 		self.event = Events()
 
 	def sendErrorAndDisconnect(self, error):
@@ -39,68 +30,6 @@ class Spheniscidae(LineReceiver, object):
 
 	def sendError(self, error):
 		self.sendXt("e", error)
-
-	def handleLogin(self, data):
-		username = data[0][0].text
-		clientHash = data[0][1].text
-
-		self.logger.info("{0} is attempting to login".format(username))
-
-		user = self.session.query(User).filter_by(Username=username).first()
-
-		if user is None:
-			return self.sendErrorAndDisconnect(101)
-
-		databasePassword = user.Password
-
-		loginHash = Crypto.getLoginHash(databasePassword, self.randomKey)
-
-		if clientHash == loginHash:
-			confirmationHash = Crypto.hash(self.randomKey)
-			friendsKey = Crypto.hash(user.Id)
-
-			self.session.add(user)
-
-			user.ConfirmationHash = confirmationHash
-			user.LoginKey = Crypto.hash(self.randomKey)
-
-			loginTime = time()
-
-			userData = "{0}|{1}|{2}|{3}|1|45|2|false|true|{4}".format(user.Id, user.Swid, user.Username,
-			                                                          user.LoginKey, loginTime)
-
-			self.sendXt("l", userData, confirmationHash, friendsKey, "101,1", "spirit@solero.me")
-
-		else:
-			self.sendErrorAndDisconnect(101)
-
-	def handleRandomKey(self, data):
-		self.logger.debug("Received random key request")
-
-		randomKey = Crypto.generateRandomKey()
-		self.randomKey = randomKey
-
-		self.logger.debug("Generated random key " + randomKey)
-
-		self.sendLine("<msg t='sys'><body action='rndK' r='-1'><k>" + self.randomKey + "</k></body></msg>")
-
-	def handleVersionCheck(self, data):
-		bodyTag = data[0]
-		apiVersion = bodyTag.get("v")
-
-		self.logger.debug("Received version check")
-
-		if apiVersion == "153":
-			self.logger.debug("API versions match")
-
-			self.sendLine("<msg t='sys'><body action='apiOK' r='0'></body></msg>")
-		elif apiVersion!= "153":
-			self.logger.debug("API versions don't match (client checked for version " + apiVersion + ")")
-
-			self.sendLine("<msg t='sys'><body action='apiKO' r='0'></body></msg>")
-		else:
-			self.logger.error("Received a version-check packet from a client without a version attribute")
-			self.loseConnection()
 
 	# TODO: Replace * with actual port
 	def sendPolicyFile(self):
@@ -121,8 +50,8 @@ class Spheniscidae(LineReceiver, object):
 				bodyTag = elementTree[0]
 				action = bodyTag.get("action")
 
-				if action in self.xmlHandlers:
-					self.xmlHandlers[action](bodyTag)
+				if self.event.exists(action):
+					self.event.emit(action, bodyTag)
 
 				else:
 					self.logger.warn("Packet did not contain a valid action attribute!")
