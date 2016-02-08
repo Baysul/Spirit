@@ -179,8 +179,6 @@ class Spheniscidae(LineReceiver, object):
 			self.handleWorldData(data)
 
 	def connectionLost(self, reason):
-		self.event.emit("disconnected", self, reason)
-
 		self.logger.info("Client disconnected")
 
 		self.spirit.players.remove(self)
@@ -199,3 +197,5 @@ class Spheniscidae(LineReceiver, object):
 
 		finally:
 			self.session.close()
+
+		self.event.emit("disconnected", self, reason)
