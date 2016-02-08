@@ -165,6 +165,8 @@ class Spheniscidae(LineReceiver, object):
 		self.logger.debug("Outgoing data: {0}".format(line))
 
 	def lineReceived(self, data):
+		self.event.emit("received", self, data)
+
 		if data.startswith("<"):
 			self.handleXmlData(data)
 		else:
