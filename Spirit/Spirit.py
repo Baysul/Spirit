@@ -7,6 +7,7 @@ import sys
 import logging
 from logging.handlers import RotatingFileHandler
 
+from types import FunctionType
 from collections import deque
 
 from sqlalchemy import create_engine
@@ -17,6 +18,7 @@ from twisted.web.client import getPage
 from twisted.internet.protocol import Factory
 
 import Handlers, Plugins
+from Events import Events
 from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 from Room import Room
@@ -65,6 +67,11 @@ class Spirit(Factory, object):
 
 		self.loadPlugins()
 
+		self.events = Events()
+
+		# Used to safely reload modules by keeping track of existing event callbacks
+		self.handlers = {}
+
 		if self.server["World"]:
 			self.protocol = Penguin
 
@@ -72,6 +79,7 @@ class Spirit(Factory, object):
 
 			self.loadItems()
 
+			self.loadHandlerModules()
 			self.loadHandlerModules()
 
 			self.logger.info("Running world server")
@@ -105,18 +113,43 @@ class Spirit(Factory, object):
 			self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
 
 	def loadHandlerModules(self, strictLoad=()):
+		handlerMethods = []
+
+		def populateHandlerMethods(moduleObject):
+			moduleMethods = [getattr(moduleObject, attribute) for attribute in dir(moduleObject)
+							 if isinstance(getattr(moduleObject, attribute), FunctionType)]
+
+			for moduleMethod in moduleMethods:
+				handlerMethods.append(moduleMethod)
+
 		for handlerModule in self.getPackageModules(Handlers):
 			if not strictLoad or strictLoad and handlerModule in strictLoad:
 
 				if handlerModule not in sys.modules.keys():
-					importlib.import_module(handlerModule)
+					moduleObject = importlib.import_module(handlerModule)
+
+					populateHandlerMethods(moduleObject)
 
 				else:
 					self.logger.info("Reloading module {0}".format(handlerModule))
 
-					moduleObject = sys.modules[handlerModule]
+					handlersCopy = self.handlers.copy()
 
-					reload(moduleObject)
+					for handlerId, handlerMethod in handlersCopy.iteritems():
+						self.events.off(handlerId, handlerMethod)
+						self.handlers.pop(handlerId, None)
+
+					moduleObject = sys.modules[handlerModule]
+					moduleObject = reload(moduleObject)
+
+					populateHandlerMethods(moduleObject)
+
+		for handlerId, listenerList in self.events._listeners.iteritems():
+			for handlerListener in listenerList:
+				handlerMethod = handlerListener.func
+
+				if handlerMethod in handlerMethods:
+					self.handlers[handlerId] = handlerMethod
 
 		self.logger.info("Handler modules loaded")
 
