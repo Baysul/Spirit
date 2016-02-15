@@ -1,10 +1,13 @@
-from ..Events import Events
+from sqlalchemy.orm import load_only
+
+from Spirit.Data.User import User
+from Spirit.Events import Events
+
 events = Events()
 
 @events.on("u#pbi")
 def handleGetPlayerInfoById(self, data):
-	from sqlalchemy.orm import load_only
-	from ..Data.User import User
+
 
 	playerId = data[4]
 

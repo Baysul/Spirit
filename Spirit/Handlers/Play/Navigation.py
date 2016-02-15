@@ -1,6 +1,7 @@
 from time import time
 
-from ..Events import Events
+from Spirit.Events import Events
+
 events = Events()
 
 @events.on("j#js")

@@ -1,4 +1,5 @@
-from ..Events import Events
+from Spirit.Events import Events
+
 events = Events()
 
 @events.on("l#mst")
