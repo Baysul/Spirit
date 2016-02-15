@@ -77,7 +77,7 @@ class Spirit(Factory, object):
 		else:
 			self.protocol = Spheniscidae
 
-			self.loadHandlerModules("Spirit.Handlers.Login.World")
+			self.loadHandlerModules("Spirit.Handlers.Login.Login")
 
 			self.logger.info("Running login server")
 
@@ -103,9 +103,9 @@ class Spirit(Factory, object):
 		else:
 			self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
 
-	def loadHandlerModules(self, excludeModules=()):
+	def loadHandlerModules(self, strictLoad=()):
 		for handlerModule in self.getPackageModules(Handlers):
-			if handlerModule not in excludeModules:
+			if not strictLoad or strictLoad and handlerModule in strictLoad:
 				importlib.import_module(handlerModule)
 
 		self.logger.info("Handler modules loaded")
