@@ -1,6 +1,4 @@
 from Spheniscidae import Spheniscidae
-from Data.User import User
-from Crypto import Crypto
 
 class Penguin(Spheniscidae):
 
