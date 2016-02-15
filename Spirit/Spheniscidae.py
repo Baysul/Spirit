@@ -51,7 +51,7 @@ class Spheniscidae(LineReceiver, object):
 				action = bodyTag.get("action")
 
 				if self.event.exists(action):
-					self.event.emit(action, bodyTag)
+					self.event.emit(action, self, bodyTag)
 
 				else:
 					self.logger.warn("Packet did not contain a valid action attribute!")
