@@ -2,6 +2,7 @@ import importlib
 import pkgutil
 import json
 import os
+import sys
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -106,7 +107,16 @@ class Spirit(Factory, object):
 	def loadHandlerModules(self, strictLoad=()):
 		for handlerModule in self.getPackageModules(Handlers):
 			if not strictLoad or strictLoad and handlerModule in strictLoad:
-				importlib.import_module(handlerModule)
+
+				if handlerModule not in sys.modules.keys():
+					importlib.import_module(handlerModule)
+
+				else:
+					self.logger.info("Reloading module {0}".format(handlerModule))
+
+					moduleObject = sys.modules[handlerModule]
+
+					reload(moduleObject)
 
 		self.logger.info("Handler modules loaded")
 
