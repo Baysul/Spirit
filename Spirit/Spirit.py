@@ -67,15 +67,17 @@ class Spirit(Factory, object):
 		if self.server["World"]:
 			self.protocol = Penguin
 
-			self.loadHandlerModules()
-
 			self.loadRooms()
 
 			self.loadItems()
 
+			self.loadHandlerModules()
+
 			self.logger.info("Running world server")
 		else:
 			self.protocol = Spheniscidae
+
+			self.loadHandlerModules("Spirit.Handlers.Login.World")
 
 			self.logger.info("Running login server")
 
@@ -101,9 +103,10 @@ class Spirit(Factory, object):
 		else:
 			self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
 
-	def loadHandlerModules(self):
+	def loadHandlerModules(self, excludeModules=()):
 		for handlerModule in self.getPackageModules(Handlers):
-			importlib.import_module(handlerModule)
+			if handlerModule not in excludeModules:
+				importlib.import_module(handlerModule)
 
 		self.logger.info("Handler modules loaded")
 
