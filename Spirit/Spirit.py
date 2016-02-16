@@ -80,7 +80,6 @@ class Spirit(Factory, object):
 			self.loadItems()
 
 			self.loadHandlerModules()
-			self.loadHandlerModules()
 
 			self.logger.info("Running world server")
 		else:
