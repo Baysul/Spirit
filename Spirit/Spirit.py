@@ -207,7 +207,7 @@ class Spirit(Factory, object):
 
 			self.logger.info("{0} items loaded".format(len(self.items)))
 
-		if not os.path.exists("crumbs/items.json"):
+		if not os.path.exists("crumbs/paper_items.json"):
 			self.downloadCrumbs("http://cdn.clubpenguin.com/play/en/web_service/game_configs/paper_items.json")\
 				.addCallback(parseItemCrumbs)
 
